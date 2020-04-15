@@ -240,7 +240,7 @@ describe('LocalizeManager', () => {
         expect(e).to.be.instanceof(Error);
         expect(e.message).to.equal(
           'Data for namespace "my-component" and locale "en-GB" could not be loaded. ' +
-            'Make sure you have data for locale "en-GB" (and/or generic language "en").',
+          'Make sure you have data for locale "en-GB" (and/or generic language "en").',
         );
         return;
       }
@@ -295,7 +295,7 @@ describe('LocalizeManager', () => {
           expect(e).to.be.instanceof(Error);
           expect(e.message).to.equal(
             'Data for namespace "my-component" and current locale "nl-NL" or fallback locale "en-GB" could not be loaded. ' +
-              'Make sure you have data either for locale "nl-NL" (and/or generic language "nl") or for fallback "en-GB" (and/or "en").',
+            'Make sure you have data either for locale "nl-NL" (and/or generic language "nl") or for fallback "en-GB" (and/or "en").',
           );
           return;
         }
@@ -592,5 +592,32 @@ describe('LocalizeManager', () => {
         `Namespace is missing in the key "${msgKey}". The format for keys is "namespace:name".`,
       );
     });
+  });
+
+
+  describe('when altering html lang attribute (like Google Translate)', () => {
+    beforeEach(() => {
+      document.documentElement.lang = 'en-GB';
+    });
+
+    it("synchronizes from LocalizeManager to html[lang]", async () => {
+      manager = new LocalizeManager();
+      manager.locale = 'nl-NL';
+      expect(document.documentElement.lang).to.equal('nl-NL');
+    });
+
+    it("doesn't synchronize from html[lang] attribute to LocalizeManager initially", async () => {
+      manager = new LocalizeManager();
+      expect(manager.locale).to.equal(undefined);
+    });
+
+    it(`doesn't synchronize from html[lang] attribute to LocalizeManager
+      when changed by 3rd parties`, async () => {
+        manager = new LocalizeManager();
+        manager.locale = 'nl-NL';
+
+        document.documentElement.lang = 'fr-FR'; // this is something google translate would do
+        expect(manager.locale).to.equal('nl-NL');
+      });
   });
 });
